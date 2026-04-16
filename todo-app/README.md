@@ -1,31 +1,69 @@
 # Todo App
 
-A simple React + TypeScript + Vite todo list application.
+A simple todo list application built with React, TypeScript, and Vite.
 
-## Setup
+## Overview
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Start development server:
-   ```bash
-   npm run dev
-   ```
+This repository contains a minimal frontend app that lets users:
 
-## Available Scripts
+- add new todo items
+- mark todos as complete
+- edit existing todos
+- delete todos
 
-- `npm run dev` - start the development server
-- `npm run build` - build the app for production
-- `npm run preview` - preview the production build
+The app is built as a single-page client-side application with no backend or persistence.
+
+## Features
+
+- React functional components with hooks
+- TypeScript for type safety
+- Vite for fast development and build
+- Basic todo editing and completion state
+
+## Getting Started
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Run the app locally
+
+```bash
+npm run dev
+```
+
+Then open the local URL shown in the terminal.
+
+### Build for production
+
+```bash
+npm run build
+```
+
+### Preview the production build
+
+```bash
+npm run preview
+```
+
+### Lint the code
+
+```bash
+npm run lint
+```
 
 ## Project structure
 
 - `src/` - application source files
+- `src/App.tsx` - main todo app component
+- `src/App.css` - app styling
 - `public/` - static assets
-- `index.html` - app entry point
+- `index.html` - application entry point
 - `vite.config.ts` - Vite configuration
 
-## Description
+## Notes
 
-This project is a minimal todo list application built with React, TypeScript, and Vite.
+- Todos are stored in local state only and reset on page refresh.
+- This repository is a good starting point for learning React + TypeScript with Vite.
