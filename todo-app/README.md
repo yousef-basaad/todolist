@@ -1,5 +1,7 @@
 # Todo App
 
+![Todo App Screenshot](src/assets/screen.png)
+
 A simple todo list application built with React, TypeScript, and Vite.
 
 ## Overview
