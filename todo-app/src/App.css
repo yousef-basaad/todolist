@@ -52,10 +52,7 @@ h1 {
   background-color: #f9f9f9;
 }
 
-.todo-item.completed span {
-  text-decoration: line-through;
-  color: #888;
-}
+
 
 .view-mode {
   display: flex;
