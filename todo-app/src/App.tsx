@@ -47,9 +47,11 @@ function App() {
     const trimmedText = text.trim()
     if (editingId === null || !trimmedText) return
 
-    setTodos(todos.map(todo =>
-      todo.id === editingId ? { ...todo, text: trimmedText } : todo
-    ))
+    setTodos(prevTodos =>
+      prevTodos.map(todo =>
+        todo.id === editingId ? { ...todo, text: trimmedText } : todo
+      )
+    )
     setEditingId(null)
     setEditValue('')
   }
@@ -70,7 +72,7 @@ function App() {
   const validateAdd = (values: AddFormValues) => {
     const errors: Record<string, string> = {}
     if (!values.todo?.trim()) {
-      errors.todo = 'Enter a todo item.'
+      errors.todo = ''
     }
     return errors
   }
