@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Field, Form } from 'react-final-form'
+import { Form } from 'react-final-form'
 import './App.css'
+import FormField from './component/FormField'
 
 interface Todo {
   id: number
@@ -8,18 +9,14 @@ interface Todo {
   completed: boolean
 }
 
-interface AddFormValues {
+interface TodoFormValues {
   todo?: string
-}
-
-interface EditFormValues {
-  edit?: string
 }
 
 function App() {
   const [todos, setTodos] = useState<Todo[]>([])
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [editValue, setEditValue] = useState('')
+  const [formInitialValues, setFormInitialValues] = useState<TodoFormValues>({})
 
   const addTodo = (text: string) => {
     const trimmedText = text.trim()
@@ -38,29 +35,6 @@ function App() {
     setTodos(prevTodos => prevTodos.filter(todo => todo.id !== id))
   }
 
-  const startEdit = (id: number, text: string) => {
-    setEditingId(id)
-    setEditValue(text)
-  }
-
-  const saveEdit = (text: string) => {
-    const trimmedText = text.trim()
-    if (editingId === null || !trimmedText) return
-
-    setTodos(prevTodos =>
-      prevTodos.map(todo =>
-        todo.id === editingId ? { ...todo, text: trimmedText } : todo
-      )
-    )
-    setEditingId(null)
-    setEditValue('')
-  }
-
-  const cancelEdit = () => {
-    setEditingId(null)
-    setEditValue('')
-  }
-
   const toggleComplete = (id: number) => {
     setTodos(prevTodos =>
       prevTodos.map(todo =>
@@ -69,18 +43,10 @@ function App() {
     )
   }
 
-  const validateAdd = (values: AddFormValues) => {
+  const validateTodo = (values: TodoFormValues) => {
     const errors: Record<string, string> = {}
     if (!values.todo?.trim()) {
-      errors.todo = ''
-    }
-    return errors
-  }
-
-  const validateEdit = (values: EditFormValues) => {
-    const errors: Record<string, string> = {}
-    if (!values.edit?.trim()) {
-      errors.edit = 'Enter a todo item.'
+      errors.todo = editingId ? 'Enter a todo item.' : ''
     }
     return errors
   }
@@ -89,32 +55,46 @@ function App() {
     <div className="app">
       <h1>TodoList</h1>
 
-      <Form<AddFormValues>
+      <Form<TodoFormValues>
+        key={editingId ?? 'new'} // Reset form when editingId changes
+        initialValues={formInitialValues}
         onSubmit={(values, form) => {
-          if (values.todo) {
-            addTodo(values.todo)
+          if (editingId !== null) {
+            const trimmedText = values.todo?.trim() || ''
+            if (trimmedText) {
+              setTodos(prevTodos =>
+                prevTodos.map(todo =>
+                  todo.id === editingId ? { ...todo, text: trimmedText } : todo
+                )
+              )
+            }
+            setEditingId(null)
+            setFormInitialValues({})
             form.reset()
+          } else {
+            if (values.todo) {
+              addTodo(values.todo)
+              form.reset()
+            }
           }
         }}
-        validate={validateAdd}
-        render={({ handleSubmit, submitting, pristine }) => (
+        validate={validateTodo}
+        render={({ handleSubmit, form, submitting, pristine }) => (
           <form className="add-todo" onSubmit={handleSubmit}>
-            <Field name="todo">
-              {({ input, meta }) => (
-                <div className="field-row">
-                  <input
-                    {...input}
-                    type="text"
-                    placeholder="Add a new todo"
-                    autoComplete="off"
-                  />
-                  {meta.touched && meta.error && (
-                    <span className="error">{meta.error}</span>
-                  )}
-                </div>
-              )}
-            </Field>
-            <button type="submit" disabled={submitting || pristine}>Add</button>
+            <FormField name="todo" placeholder={editingId ? "Edit todo..." : "Add a new todo"} autoComplete="off" />
+            <button type="submit" disabled={submitting || pristine}>{editingId ? "Update" : "Add"}</button>
+            {editingId && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(null)
+                  setFormInitialValues({})
+                  form.reset()
+                }}
+              >
+                Cancel
+              </button>
+            )}
           </form>
         )}
       />
@@ -122,59 +102,23 @@ function App() {
       <ul className="todo-list">
         {todos.map(todo => (
           <li key={todo.id} className={`todo-item${todo.completed ? ' completed' : ''}`}>
-            {editingId === todo.id ? (
-              <Form<EditFormValues>
-                initialValues={{ edit: editValue }}
-                onSubmit={(values) => saveEdit(values.edit ?? '')}
-                validate={validateEdit}
-                render={({ handleSubmit, form, submitting, pristine }) => (
-                  <form className="edit-mode" onSubmit={handleSubmit}>
-                    <Field name="edit">
-                      {({ input, meta }) => (
-                        <div className="field-row">
-                          <input
-                            {...input}
-                            type="text"
-                            autoFocus
-                          />
-                          {meta.touched && meta.error && (
-                            <span className="error">{meta.error}</span>
-                          )}
-                        </div>
-                      )}
-                    </Field>
-                    <button type="submit" disabled={submitting || pristine}>Save</button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        cancelEdit()
-                        form.reset()
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </form>
-                )}
+            <div className="view-mode">
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => toggleComplete(todo.id)}
               />
-            ) : (
-              <div className="view-mode">
-                <input
-                  type="checkbox"
-                  checked={todo.completed}
-                  onChange={() => toggleComplete(todo.id)}
-                />
-                <span
-                  style={{
-                    textDecoration: todo.completed ? 'line-through' : 'none',
-                    color: todo.completed ? '#888' : 'inherit'
-                  }}
-                >
-                  {todo.text} <small>({String(todo.completed)})</small>
-                </span>
-                <button onClick={() => startEdit(todo.id, todo.text)}>Edit</button>
-                <button onClick={() => deleteTodo(todo.id)}>Delete</button>
-              </div>
-            )}
+              <span
+                style={{
+                  textDecoration: todo.completed ? 'line-through' : 'none',
+                  color: todo.completed ? '#888' : 'inherit'
+                }}
+              >
+                {todo.text} <small>({String(todo.completed)})</small>
+              </span>
+              <button onClick={() => { setEditingId(todo.id); setFormInitialValues({ todo: todo.text }) }}>Edit</button>
+              <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+            </div>
           </li>
         ))}
       </ul>
