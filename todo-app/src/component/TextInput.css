@@ -1,10 +1,10 @@
-/* container */
+
 .field-row {
   display: flex;
   flex-direction: column;
 }
 
-/* input style (مستوحى من add + edit) */
+
 .field-row input {
   flex: 1;
   padding: 10px;
@@ -13,7 +13,7 @@
   border-radius: 4px;
 }
 
-/* error message */
+
 .error {
   color: red;
   font-size: 12px;
