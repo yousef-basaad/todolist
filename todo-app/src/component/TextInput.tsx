@@ -5,6 +5,7 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string
 }
 
+
 const TextInput: React.FC<TextInputProps> = ({
   error,
   ...props
