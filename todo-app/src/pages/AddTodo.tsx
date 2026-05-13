@@ -1,14 +1,12 @@
 import { Form } from 'react-final-form'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import FormField from '../component/FormField'
+import type { AppOutletContext } from '../App'
 import { TodoFormValues } from '../hooks/useTodos'
 
-interface AddTodoProps {
-  addTodo: (text: string) => void
-}
-
-const AddTodo: React.FC<AddTodoProps> = ({ addTodo }) => {
+const AddTodo = () => {
   const navigate = useNavigate()
+  const { addTodo } = useOutletContext<AppOutletContext>()
 
   const validateTodo = (values: TodoFormValues) => {
     const errors: Record<string, string> = {}

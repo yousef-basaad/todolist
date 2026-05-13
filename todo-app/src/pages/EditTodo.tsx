@@ -1,19 +1,25 @@
 import { Form } from 'react-final-form'
-import { useNavigate, useParams } from 'react-router-dom'
-// import { useEffect } from 'react'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import FormField from '../component/FormField'
+import { getTodos } from '../api/todos'
+import type { AppOutletContext } from '../App'
 import { TodoFormValues } from '../hooks/useTodos'
 
-interface EditTodoProps {
-  todos: { id: number; text: string; completed: boolean }[]
-  updateTodo: (id: number, text: string) => void
-}
-
-const EditTodo: React.FC<EditTodoProps> = ({ todos, updateTodo }) => {
+const EditTodo = () => {
   const navigate = useNavigate()
+  const { todos, updateTodo } = useOutletContext<AppOutletContext>()
+  const todosQuery = useQuery({
+    queryKey: ['todos'],
+    queryFn: getTodos,
+  })
+
+  const loading = todosQuery.isLoading
+  const error = todosQuery.error instanceof Error ? todosQuery.error.message : null
+
   const { id } = useParams<{ id: string }>()
-  const todoId = id ? parseInt(id) : null
-  const todo = todos.find(t => t.id === todoId)
+  const todoId = id ? parseInt(id, 10) : null
+  const todo = todos.find((t) => t.id === todoId)
 
   const validateTodo = (values: TodoFormValues) => {
     const errors: Record<string, string> = {}
@@ -23,8 +29,29 @@ const EditTodo: React.FC<EditTodoProps> = ({ todos, updateTodo }) => {
     return errors
   }
 
+  if (loading) {
+    return (
+      <div className="app">
+        <p className="status-message">Loading todo...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="app">
+        <p className="status-message error-message">{error}</p>
+      </div>
+    )
+  }
+
   if (!todo) {
-    return <div>Todo not found</div>
+    return (
+      <div className="app">
+        <p className="status-message error-message">Todo not found.</p>
+        <button type="button" onClick={() => navigate('/')}>Back</button>
+      </div>
+    )
   }
 
   return (
@@ -44,12 +71,7 @@ const EditTodo: React.FC<EditTodoProps> = ({ todos, updateTodo }) => {
           <form className="add-todo" onSubmit={handleSubmit}>
             <FormField name="todo" placeholder="Edit todo..." autoComplete="off" />
             <button type="submit" disabled={submitting || pristine}>Update</button>
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-            >
-              Cancel
-            </button>
+            <button type="button" onClick={() => navigate('/')}>Cancel</button>
           </form>
         )}
       />
